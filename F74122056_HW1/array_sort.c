@@ -58,8 +58,8 @@ int main(int argc, char *argv[])
                 "j done            \n\t"
 
                 "swap:             \n\t"
-                "sw t5, 0(t2)      \n\t"
-                "sw t6, 0(t3)      \n\t"
+                "sw t5, 0(t3)      \n\t"
+                "sw t6, 0(t2)      \n\t"
 
                 "done:             \n\t"
 
