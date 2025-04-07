@@ -37,8 +37,8 @@ int arraySearch(int *p_a, int arr_size, int target)
 
         "done_search:                \n\t"
         "add %[res], t1, x0          \n\t"//write it back
-        : [res] "+r"(result), [A] "r"(p_a), [cnt] "r"(arr_size), [tar] "r"(target)
-        : 
+        : [res] "+r" (result)
+        : [A] "r" (p_a), [cnt] "r" (arr_size), [tar] "r" (target)
         : "t0", "t1", "t2", "t3", "t4"
         );
 
