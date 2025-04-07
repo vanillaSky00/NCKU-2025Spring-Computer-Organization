@@ -18,27 +18,36 @@ void splitList(Node *head, Node **firstHalf, Node **secondHalf)
          * faster: use fast/slow pointer
          */
         "add t0, %[head], x0         \n\t"//t0 = address of head
-        "add t1, %[head], x0"
+        "addi t1, x0, 1              \n\t"//t1 = 0 = counter for loop
 
-        "1:"
-        "lw t1, 8(t1)" //fast_p = head->next
-        "beqz t1, 2"
-        "lw t1, 8(t1)" //fast_p = head->next->next
-        "beqz t1, 2"
-        "lw t0, 8(t0)" //slow_p = head->next
-        "j 1"
+        "COUNT_LEN:                  \n\t"
+        "beq t0, x0, DONE_COUNT      \n\t"
+        "lw t2, 8(t0)                \n\t"//t2 = cur->next
+        "addi t1, t1, 1              \n\t"//get the len
+        "add t0, t2, x0"//cur = cur->next
+        "j COUNT_LEN"
+
+        "DONE_COUNT:"
+
+        "srli t2, t1, 1" //t2 = t1/2 = len/2
+
+        "add t0, %[head], x0"//reset
+        "add t1, x0, 0"
     
-        "2:"
-        "lw t2, 8(t0)" //t2=slow->next
-        "sw x0, 8(t0)" //slow->next = NULL
+        /////i am writing till heree///
+        "SPLIT:"
+        "add t0, t0, 8"
+        "addi t1, t1, 1"
+        "bne t1, t2, SPLIT"
 
-        "add %[first], %[head], x0"
-        "add %[second], t2, x0"
+        "DONE:"
+        "sw t1, %[second]"
+        "sw head, %[first]"
 
-        : [first] "=r" (*firstHalf), [second] "=r" (*secondHalf)
-        : [head] "r" (head)
-        : "t0", "t1", "t2", "memory"
-        );
+        : [first] "=r"(*firstHalf), [second] "=r"(*secondHalf)
+        : [head] "r"(head)
+        : "t0, t1, t2"
+        "");
 }
 
 // Merge two sorted linked lists
@@ -108,9 +117,9 @@ int main(int argc, char *argv[])
             Block C (Move to the next node), which updates the pointer to
             traverse the linked list
             */
-           "lw %[cur], 8(%[cur])" //in x86 the offset is 8
+           "addi %[cur], %[cur], 8" //in x86 the offset is 8
            
-           : [cur] "+r" (cur)
+           : [cur] "+r"(cur)
            : 
            : "memory"//why?
             "");

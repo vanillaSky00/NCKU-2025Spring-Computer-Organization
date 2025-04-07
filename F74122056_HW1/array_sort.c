@@ -63,8 +63,8 @@ int main(int argc, char *argv[])
 
                 "done:             \n\t"
 
-                : [A] "+r"(p_a)
-                : [j] "r"(j)
+                : [A] "+r"(p_a), [j] "r"(j)
+                : 
                 : "t0", "t2", "t3", "t6", "t7"
                 );  
         }
