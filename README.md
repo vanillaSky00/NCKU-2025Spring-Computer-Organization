@@ -5,93 +5,118 @@ The goal is to integrate assembly instructions directly within C code to handle 
 
 Input values should only be stored in registers when modification is needed. If no modification (e.g., comparison) is required, there's no need to store the values in registers.
 ```
+asm volatile(
+    // Your code
+    "add t0, %[j], x0  \n\t"//t0=j
+    "slli t0, t0, 2     \n\t"//i element 4 byte
+    "add t2, %[A], t0  \n\t"//t2 store the address of a[j]
+    
+    "lw t5, 0(t2)      \n\t"//t5=a[j]
 
+    "addi t0, t0, 4    \n\t"//
+    "add t3, %[A], t0  \n\t"//t3 store the address of a[j+1]
+    "lw t6, 0(t3)      \n\t"//t6=a[j+1]
+
+    "bgt t5, t6, swap  \n\t"//compare
+
+    "j done            \n\t"
+
+    "swap:             \n\t"
+    "sw t5, 0(t3)      \n\t"
+    "sw t6, 0(t2)      \n\t"
+
+    "done:             \n\t"
+
+    : [A] "+r" (p_a)
+    : [j] "r" (j)
+    : "t0", "t2", "t3", "t5", "t6"
+    );  
 ```
 
 ```
-            asm volatile(
-                // Your code
-                "add t0, %[j], x0  \n\t"//t0=j
-                "slli t0, t0, 2     \n\t"//i element 4 byte
-                "add t2, %[A], t0  \n\t"//t2 store the address of a[j]
+asm volatile(
+    // Your code
+    "add t0, %[j], x0  \n\t"//t0=j
+    "slli t0, t0, 2     \n\t"//i element 4 byte
+    "add t2, %[A], t0  \n\t"//t2 store the address of a[j]
 
-                "lw t5, 0(t2)      \n\t"//t5=a[j]
+    "lw t5, 0(t2)      \n\t"//t5=a[j]
 
-                "addi t0, t0, 4    \n\t"//
-                "add t3, %[A], t0  \n\t"//t3 store the address of a[j+1]
-                "lw t6, 0(t3)      \n\t"//t6=a[j+1]
+    "addi t0, t0, 4    \n\t"//
+    "add t3, %[A], t0  \n\t"//t3 store the address of a[j+1]
+    "lw t6, 0(t3)      \n\t"//t6=a[j+1]
 
-                "ble t5, t6, done  \n\t"//compare, if t5<t6 no swap, order is correct
+    "ble t5, t6, done  \n\t"//compare, if t5<t6 no swap, order is correct
 
-                "sw t5, 0(t3)      \n\t"
-                "sw t6, 0(t2)      \n\t"
+    "sw t5, 0(t3)      \n\t"
+    "sw t6, 0(t2)      \n\t"
 
-                "done:             \n\t"
+    "done:             \n\t"
 
-                : [A] "+r"(p_a)
-                : [j] "r" (j)
-                : "t0", "t2", "t3", "t5", "t6"
-                );
-        }
+    : [A] "+r"(p_a)
+    : [j] "r" (j)
+    : "t0", "t2", "t3", "t5", "t6"
+    );
+}
 ```
 
 
 ```
 asm volatile(
-        "add t0, %[cnt], x0          \n\t" //t0=arr_size
-        "add t1, %[res], x0          \n\t" //t1=result
-        "add t2, %[tar], x0          \n\t" //t2=target
-        
-        "beq t0, x0, done_search     \n\t" //if arr_size=0 skip search
+    "add t0, %[cnt], x0          \n\t" //t0=arr_size
+    "add t1, %[res], x0          \n\t" //t1=result
+    "add t2, %[tar], x0          \n\t" //t2=target
 
-        "addi t3, x0, 0              \n\t"
+    "beq t0, x0, done_search     \n\t" //if arr_size=0 skip search
 
-        "search_loop:                \n\t"
-        "lw t4, 0(%[A])              \n\t"   
-        "beq t4, t2, found           \n\t"
-        "addi %[A], %[A], 4          \n\t"
-        "addi t3, t3, 1              \n\t"
-        "ble t3, t0, search_loop     \n\t"
-        
-        "j done_search               \n\t"
+    "addi t3, x0, 0              \n\t"
 
-        "found:                      \n\t"
-        "add t1, t3, 0               \n\t"
+    "search_loop:                \n\t"
+    "lw t4, 0(%[A])              \n\t"   
+    "beq t4, t2, found           \n\t"
+    "addi %[A], %[A], 4          \n\t"
+    "addi t3, t3, 1              \n\t"
+    "ble t3, t0, search_loop     \n\t"
 
-        "done_search:                \n\t"
-        "add %[res], t1, x0          \n\t"//write it back
-        : [res] "+r" (result)
-        : [A] "r" (p_a), [cnt] "r" (arr_size), [tar] "r" (target)
-        : "t0", "t1", "t2", "t3", "t4"
-        );
+    "j done_search               \n\t"
+
+    "found:                      \n\t"
+    "add t1, t3, 0               \n\t"
+
+    "done_search:                \n\t"
+    "add %[res], t1, x0          \n\t"//write it back
+    : [res] "+r" (result)
+    : [A] "r" (p_a), [cnt] "r" (arr_size), [tar] "r" (target)
+    : "t0", "t1", "t2", "t3", "t4"
+    );
 ```
 refactorize to:
 
 ```
 asm volatile(
-        "beq %[cnt], x0, done_search \n\t"
-        "addi t3, x0, 0              \n\t"
-        "add t5, %[A], x0            \n\t"
+    "beq %[cnt], x0, done_search \n\t"
+    "addi t3, x0, 0              \n\t"
+    "add t5, %[A], x0            \n\t"
 
-        "search_loop:                \n\t"
-        "lw t4, 0(t5)                \n\t"
-        "beq t4, %[tar], found       \n\t"
-        "addi t5, t5, 4              \n\t"
-        "addi t3, t3, 1              \n\t"
-        "blt t3, %[cnt], search_loop \n\t"
-        "j not_found                 \n\t"
+    "search_loop:                \n\t"
+    "lw t4, 0(t5)                \n\t"
+    "beq t4, %[tar], found       \n\t"
+    "addi t5, t5, 4              \n\t"
+    "addi t3, t3, 1              \n\t"
+    "blt t3, %[cnt], search_loop \n\t"
+    "j not_found                 \n\t"
 
-        "found:                      \n\t"
-        "add %[res], t3, x0          \n\t"
-        "j done_search               \n\t"
+    "found:                      \n\t"
+    "add %[res], t3, x0          \n\t"
+    "j done_search               \n\t"
 
-        "not_found:                  \n\t"
-        "addi %[res], x0, -1         \n\t"
+    "not_found:                  \n\t"
+    "addi %[res], x0, -1         \n\t"
 
-        "done_search:                \n\t"
+    "done_search:                \n\t"
 
-        : [res] "+r" (result)
-        : [A] "r" (p_a), [cnt] "r" (arr_size), [tar] "r" (target)
-        : "t3", "t4", "t5"
-        );
+    : [res] "+r" (result)
+    : [A] "r" (p_a), [cnt] "r" (arr_size), [tar] "r" (target)
+    : "t3", "t4", "t5"
+    );
 ```
