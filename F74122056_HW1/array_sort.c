@@ -44,28 +44,28 @@ int main(int argc, char *argv[])
             asm volatile(
                 // Your code
                 "add t0, %[j], x0  \n\t"//t0=j
-                "mul t0, t0, 4     \n\t"//i element 4 byte
+                "slli t0, t0, 2     \n\t"//i element 4 byte
                 "add t2, %[A], t0  \n\t"//t2 store the address of a[j]
                 
-                "lw t6, 0(t2)      \n\t"//t6=a[j]
+                "lw t5, 0(t2)      \n\t"//t5=a[j]
             
                 "addi t0, t0, 4    \n\t"//
                 "add t3, %[A], t0  \n\t"//t3 store the address of a[j+1]
-                "lw t7, 0(t3)      \n\t"//t7=a[j+1]
+                "lw t6, 0(t3)      \n\t"//t6=a[j+1]
 
-                "bgt t6, t7, swap  \n\t"//compare
+                "bgt t5, t6, swap  \n\t"//compare
 
                 "j done            \n\t"
 
                 "swap:             \n\t"
-                "sw t6, 0(t2)      \n\t"
-                "sw t7, 0(t3)      \n\t"
+                "sw t5, 0(t2)      \n\t"
+                "sw t6, 0(t3)      \n\t"
 
                 "done:             \n\t"
 
                 : [A] "+r"(p_a), [j] "r"(j)
                 : 
-                : "t0", "t2", "t3", "t6", "t7"
+                : "t0", "t2", "t3", "t5", "t6"
                 );  
         }
     }
