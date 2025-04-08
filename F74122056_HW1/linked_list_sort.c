@@ -18,25 +18,24 @@ void splitList(Node *head, Node **firstHalf, Node **secondHalf)
          * faster: use fast/slow pointer
          */
         "add t0, %[head], x0         \n\t"//t0 = address of head
-        "add t1, %[head], x0"
+        "add t1, %[head], x0         \n\t"
 
-        "1:"
-        "lw t1, 8(t1)" //fast_p = head->next
-        "beqz t1, 2"
-        "lw t1, 8(t1)" //fast_p = head->next->next
-        "beqz t1, 2"
-        "lw t0, 8(t0)" //slow_p = head->next
-        "j 1"
-    
-        "2:"
-        "lw t2, 8(t0)" //t2=slow->next
-        "sw x0, 8(t0)" //slow->next = NULL
+        "1:                          \n\t"
+        "lw t1, 8(t1)                \n\t" //fast_p = head->next
+        "beqz t1, 2                  \n\t"
+        "lw t1, 8(t1)                \n\t" //fast_p = head->next->next
+        "beqz t1, 2                  \n\t"
+        "lw t0, 8(t0)                \n\t" //slow_p = head->next
+        "j 1b                        \n\t"
 
-        "add %[first], %[head], x0"
-        "add %[second], t2, x0"
+        "2:                          \n\t"
+        "lw t2, 8(t0)                \n\t" //t2=slow->next
+        "sw x0, 8(t0)                \n\t" //slow->next = NULL
 
-        : [first] "=r" (*firstHalf), [second] "=r" (*secondHalf)
-        : [head] "r" (head)
+        "sw %[head], 0(%[first])     \n\t" // *firstHalf = head
+        "sw t2, 0(%[second])         \n\t" // *secondHalf = t2
+        : 
+        : [first] "r" (*firstHalf), [second] "r" (*secondHalf), [head] "r" (head)
         : "t0", "t1", "t2", "memory"
         );
 }
@@ -51,7 +50,47 @@ Node *mergeSortedLists(Node *a, Node *b)
         /*
         Block B (mergeSortedList), which merges two sorted lists into one
         */
-        "");
+        "add t3, %[a], 0             \n\t" //address i for a 
+        "add t4, %[b], 0             \n\t" //address j for b
+        "add t5, %[res], 0           \n\t" //k for res->-..>..
+
+        "comp_loop:                  \n\t"
+        "beq t3, x0, b_remain        \n\t"
+        "beq t4, x0, a_remain        \n\t"
+        "lw t1, 0(t3)                \n\t"
+        "lw t2, 0(t4)                \n\t"
+
+        "blt t1, t2, left_part       \n\t"
+        "j right_part                \n\t"
+
+        "j done                      \n\t"
+
+        "left_part:                  \n\t"
+        "sw t3, 8(t5)                \n\t"
+        "lw t3, 8(t3)                \n\t"
+        "j update_res                \n\t"
+
+        "right_part:                 \n\t"
+        "sw t4, 8(t5)                \n\t"
+        "lw t4, 8(t4)                \n\t"
+
+        "update_res:                 \n\t"
+        "addi t5, t5, 8              \n\t"//t5 is pointer to res, not a struct
+        "j comp_loop                 \n\t"
+
+        "a_remain:                   \n\t"
+        "sw t3, 8(t5)                \n\t"
+        "j done                      \n\t"
+
+        "b_remain:                   \n\t"
+        "sw t4, 8(t5)                \n\t"
+
+        "done:                       \n\t"
+
+
+        : [res] "+r" (result)
+        : [a] "r" (a), [b] "r" (b)
+        ); : "t1", "t2", "t3", "t4", "t5"
 
     return result;
 }
@@ -108,7 +147,7 @@ int main(int argc, char *argv[])
             Block C (Move to the next node), which updates the pointer to
             traverse the linked list
             */
-           "lw %[cur], 8(%[cur])" //in x86 the offset is 8
+           "lw %[cur], 8(%[cur])       \n\t" //in x86 the offset is 8
            
            : [cur] "+r" (cur)
            : 
