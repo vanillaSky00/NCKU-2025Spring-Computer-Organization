@@ -13,7 +13,7 @@ void splitList(Node *head, Node **firstHalf, Node **secondHalf)
         /*
         Block A (splitList), which splits the linked list into two halves
         */
-                /**
+        /**
          * slow: iterate 1 time to know the length 
          * faster: use fast/slow pointer
          */
@@ -50,6 +50,7 @@ Node *mergeSortedLists(Node *a, Node *b)
         /*
         Block B (mergeSortedList), which merges two sorted lists into one
         */
+<<<<<<< HEAD
 	"beqz %[a], merge_b_remain    \n\t"  // if a is NULL, merge remaining b
         "beqz %[b], merge_a_remain    \n\t"  // if b is NULL, merge remaining a
         
@@ -158,7 +159,7 @@ int main(int argc, char *argv[])
             Block C (Move to the next node), which updates the pointer to
             traverse the linked list
             */
-            
+        
 	   "ld %[cur], 8(%[cur])      \n\t" //in x86 the offset is 8
            
            : [cur] "+r" (cur)

@@ -6,12 +6,12 @@ int arraySearch(int *p_a, int arr_size, int target)
 
     asm volatile(
         // Your code
-	/**
-         * 1. place result, target, arra_size into three registers
-         * 2. check arr size if 0 then branch out to leave result still -1
-         * 3. set a variable i for counting loops
-         * 4. bne(compared to target register) to the loop if not find the a[i]
-         * 5. if equal then assign i to result
+         
+	/* 
+         * 1. check arr size if 0 then branch out to leave result still -1
+         * 2. set a variable i for counting loops
+         * 3. compared to target register
+         * 4. if equal then assign i to result
          * 
          */
         "beq %[cnt], x0, done_search \n\t"
