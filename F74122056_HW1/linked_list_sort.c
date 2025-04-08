@@ -32,7 +32,7 @@ void splitList(Node *head, Node **firstHalf, Node **secondHalf)
         "ld t2, 8(t0)                \n\t"//t2=slow->next
         "sd x0, 8(t0)                \n\t"//slow->next = NULL
 
-        "sd %[head], 0(%[first])     \n\t"// *firstHalf = head
+        "sd %[head], 0(%[first])     \n\t"//*firstHalf = head
         "sd t2, 0(%[second])         \n\t"
 	:
         : [first] "r" (firstHalf), [second] "r" (secondHalf), [head] "r" (head)
@@ -51,53 +51,53 @@ Node *mergeSortedLists(Node *a, Node *b)
         Block B (mergeSortedList), which merges two sorted lists into one
         */
 <<<<<<< HEAD
-	"beqz %[a], merge_b_remain    \n\t"  // if a is NULL, merge remaining b
-        "beqz %[b], merge_a_remain    \n\t"  // if b is NULL, merge remaining a
+	"beqz %[a], merge_b_remain    \n\t"//if a is NULL, merge remaining b
+        "beqz %[b], merge_a_remain    \n\t"//if b is NULL, merge remaining a
         
         // initialize result with the smaller first element
-        "ld t0, 0(%[a])               \n\t"  // t0 = a->data
-        "ld t1, 0(%[b])               \n\t"  // t1 = b->data
-        "bge t0, t1, merge_b_first    \n\t"  // if a->data >= b->data, take b first
+        "ld t0, 0(%[a])               \n\t"//t0 = a->data
+        "ld t1, 0(%[b])               \n\t"//t1 = b->data
+        "bge t0, t1, merge_b_first    \n\t"//if a->data >= b->data, take b first
         
         "merge_a_first:               \n\t"
-        "add %[res], %[a], x0         \n\t"  // result = a
-        "add %[tail], %[a], x0        \n\t"  // tail = a
-        "ld %[a], 8(%[a])             \n\t"  // a = a->next
+        "add %[res], %[a], x0         \n\t"//result = a
+        "add %[tail], %[a], x0        \n\t"//tail = a
+        "ld %[a], 8(%[a])             \n\t"//a = a->next
         "j merge_compare              \n\t"
         
         "merge_b_first:               \n\t"
-        "add %[res], %[b], x0         \n\t"  // result = b
-        "add %[tail], %[b], x0        \n\t"  // tail = b
-        "ld %[b], 8(%[b])             \n\t"  // b = b->next
+        "add %[res], %[b], x0         \n\t"//result = b
+        "add %[tail], %[b], x0        \n\t"//tail = b
+        "ld %[b], 8(%[b])             \n\t"//b = b->next
         
         "merge_compare:               \n\t"
-        "beqz %[a], merge_b_remain    \n\t"  // if a is NULL, merge remaining b
-        "beqz %[b], merge_a_remain    \n\t"  // if b is NULL, merge remaining a
+        "beqz %[a], merge_b_remain    \n\t"//if a is NULL, merge remaining b
+        "beqz %[b], merge_a_remain    \n\t"//if b is NULL, merge remaining a
         
-        "ld t0, 0(%[a])               \n\t"  // t0 = a->data
-        "ld t1, 0(%[b])               \n\t"  // t1 = b->data
-        "bge t0, t1, merge_b_next     \n\t"  // if a->data >= b->data, take b
+        "ld t0, 0(%[a])               \n\t"//t0 = a->data
+        "ld t1, 0(%[b])               \n\t"//t1 = b->data
+        "bge t0, t1, merge_b_next     \n\t"//if a->data >= b->data, merge b
         
         "merge_a_next:                \n\t"
-        "sd %[a], 8(%[tail])          \n\t"  // tail->next = a
-        "add %[tail], %[a], x0        \n\t"  // tail = a
-        "ld %[a], 8(%[a])             \n\t"  // a = a->next
+        "sd %[a], 8(%[tail])          \n\t"//tail->next = a
+        "add %[tail], %[a], x0        \n\t"//tail = a
+        "ld %[a], 8(%[a])             \n\t"//a = a->next
         "j merge_compare              \n\t"
         
         "merge_b_next:                \n\t"
-        "sd %[b], 8(%[tail])          \n\t"  // tail->next = b
-        "add %[tail], %[b], x0        \n\t"  // tail = b
-        "ld %[b], 8(%[b])             \n\t"  // b = b->next
+        "sd %[b], 8(%[tail])          \n\t"//tail->next = b
+        "add %[tail], %[b], x0        \n\t"//tail = b
+        "ld %[b], 8(%[b])             \n\t"//b = b->next
         "j merge_compare              \n\t"
         
         "merge_a_remain:              \n\t"
-        "beqz %[a], merge_done        \n\t"  // if a is NULL, we're done
-        "sd %[a], 8(%[tail])          \n\t"  // tail->next = a
+        "beqz %[a], merge_done        \n\t"//if a is NULL, done
+        "sd %[a], 8(%[tail])          \n\t"//tail->next = a
         "j merge_done                 \n\t"
         
         "merge_b_remain:              \n\t"
-        "beqz %[b], merge_done        \n\t"  // if b is NULL, we're done
-        "sd %[b], 8(%[tail])          \n\t"  // tail->next = b
+        "beqz %[b], merge_done        \n\t"//if b is NULL, done
+        "sd %[b], 8(%[tail])          \n\t"//tail->next = b
         
         "merge_done:                \n\t"
         : [res] "+r" (result), [tail] "+r" (tail), [a] "+r" (a), [b] "+r" (b)
@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
             traverse the linked list
             */
         
-	   "ld %[cur], 8(%[cur])      \n\t" //in x86 the offset is 8
+	   "ld %[cur], 8(%[cur])      \n\t"//in x86 the offset is 8
            
            : [cur] "+r" (cur)
            :
