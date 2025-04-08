@@ -43,22 +43,22 @@ int main(int argc, char *argv[])
         for (int j = 0; j < arr_size - i - 1; j++) {
             asm volatile(
                 // Your code
-		"add t0, %[j], x0  \n\t"//t0=j
+		"add t0, %[j], x0   \n\t"//t0=j
                 "slli t0, t0, 2     \n\t"//i element 4 byte
-                "add t2, %[A], t0  \n\t"//t2 store the address of a[j]
+                "add t2, %[A], t0   \n\t"//t2 store the address of a[j]
 
-                "lw t5, 0(t2)      \n\t"//t5=a[j]
+                "lw t5, 0(t2)       \n\t"//t5=a[j]
 
-                "addi t0, t0, 4    \n\t"//
-                "add t3, %[A], t0  \n\t"//t3 store the address of a[j+1]
-                "lw t6, 0(t3)      \n\t"//t6=a[j+1]
+                "addi t0, t0, 4     \n\t"//
+                "add t3, %[A], t0   \n\t"//t3 store the address of a[j+1]
+                "lw t6, 0(t3)       \n\t"//t6=a[j+1]
 
-                "ble t5, t6, done  \n\t"//compare, if t5<t6 no swap, order is correct
+                "ble t5, t6, done   \n\t"//compare, if t5<t6 no swap, order is correct
 
-                "sw t5, 0(t3)      \n\t"
-                "sw t6, 0(t2)      \n\t"
+                "sw t5, 0(t3)       \n\t"
+                "sw t6, 0(t2)       \n\t"
 
-                "done:             \n\t"
+                "done:              \n\t"
 
                 : [A] "+r" (p_a)
                 : [j] "r" (j)
