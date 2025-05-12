@@ -1,4 +1,4 @@
-"loop:                                         \n\t"
+"double_loop:                                  \n\t"
     "fld f0, 0(%[h])                           \n\t"
     "fld f1, 0(%[x])                           \n\t"
     "fmul.d f0, f0, f1                         \n\t"
@@ -10,4 +10,4 @@
     "addi %[dmul_cnt], %[dmul_cnt], 2          \n\t"
     "addi %[dlw_cnt], %[dlw_cnt], 2            \n\t"
     "addi %[others_cnt], %[others_cnt], 1      \n\t"
-    "bnez %[arr_size], loop                    \n\t"
+    "bnez %[arr_size], double_loop             \n\t"

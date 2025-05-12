@@ -20,10 +20,6 @@ Complex complex_add(Complex a, Complex b)
         #include "complex_add.c"
         :[C_Re] "=f"(result.Re), [C_Im] "=f"(result.Im), [fadd_cnt] "+r"(fadd_cnt)
         :[A_Re] "f"(a.Re), [B_Re] "f"(b.Re), [A_Im] "f"(a.Im), [B_Im] "f"(b.Im));
-    //printf("add operation\n");
-    //printf("A_Re:%f,A_Im:%f\n",a.Re,a.Im);
-    //printf("B_Re:%f,B_Im:%f\n",b.Re,b.Im);
-    //printf("C_Re:%f,C_Im:%f\n",result.Re,result.Im);
     return result;
 }
 
@@ -36,10 +32,6 @@ Complex complex_sub(Complex a, Complex b)
         #include "complex_sub.c"
         :[C_Re] "=f"(result.Re), [C_Im] "=f"(result.Im), [fsub_cnt] "+r"(fsub_cnt)
         :[A_Re] "f"(a.Re), [B_Re] "f"(b.Re), [A_Im] "f"(a.Im), [B_Im] "f"(b.Im));
-    //printf("sub operation\n");
-    //printf("A_Re:%f,A_Im:%f\n",a.Re,a.Im);
-    //printf("B_Re:%f,B_Im:%f\n",b.Re,b.Im);
-    //printf("C_Re:%f,C_Im:%f\n",result.Re,result.Im);
     return result;
 }
 
@@ -53,16 +45,11 @@ Complex complex_mul(Complex a, Complex b)
         [A_Im] "f"(a.Im), [B_Im] "f"(b.Im)
         : "f1", "f2", "f3", "f4"
     );
-    //printf("mul operation\n");
-    //printf("A_Re:%f,A_Im:%f\n",a.Re,a.Im);
-    //printf("B_Re:%f,B_Im:%f\n",b.Re,b.Im);
-    //printf("C_Re:%f,C_Im:%f\n",result.Re,result.Im);
     return result;
 }
 
 uint32_t Log2(uint32_t N)
 {
-    //N = 1024;	
     uint32_t log = 0;
     asm volatile(
         #include "log2.c"
@@ -70,7 +57,6 @@ uint32_t Log2(uint32_t N)
         :
         : "t0", "t1"
     );
-    //printf("N:%d log::%d\n",N ,log);
     return log;
 }
 
@@ -91,20 +77,17 @@ float PI(void)
         : "f1", "f2", "t1", "t2", "t3", "t4"
     );
     pi = 4 * pi;
-    //printf("%f\n", pi);
     return pi;
 }
 
 uint32_t bit_reverse(uint32_t b, uint32_t m)
 {
-    //printf("org:b=%d,m=%d\n",b,m);
     asm volatile (
         #include "bit_reverse.c"
         : [b] "+r"(b), [lw_cnt] "+r"(lw_cnt), [add_cnt] "+r"(add_cnt), [sub_cnt] "+r"(sub_cnt), [sw_cnt] "+r"(sw_cnt), [others_cnt] "+r"(others_cnt)
         : [m] "r"(m)
         : "t0", "t1", "t2"
     );
-    //printf("now:%d\n",b);
     return b;
 }
 
@@ -160,30 +143,7 @@ void print_fft(Complex *x, int N)
 
 int main() {
 
-    FILE *fp = fopen("fft_input.txt", "r");
-    if (fp == NULL) {
-        perror("Failed to open file");
-        return 1;
-    }
 
-    Complex *data = malloc(N * sizeof(Complex));
-    if (data == NULL) {
-        perror("Memory allocation failed");
-        fclose(fp);
-        return 1;
-    }
-
-    for (int i = 0; i < N; i++) {
-        fscanf(fp, "%f %f", &data[i].Re, &data[i].Im);
-    }
-
-    fft(data, N);
-
-    printf("===== Question 1-1 =====\n");
-
-    printf("FFT result:\n");
-    print_fft(data, N);
-    printf("\n");
 
     printf("PI = %.6f\n", pi);
     printf("\n");

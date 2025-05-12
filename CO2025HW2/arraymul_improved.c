@@ -1,4 +1,4 @@
-"loop:"                                           
+"improved_loop:                               \n\t"                                           
     "vsetvli t0, %[arr_size], e32             \n\t"
     "sub %[arr_size], %[arr_size], t0         \n\t"
     "vle32.v v0, 0(%[h])                      \n\t" 
@@ -17,4 +17,4 @@
     "addi %[lw_cnt], %[lw_cnt], 2             \n\t" 
     "addi %[sw_cnt], %[sw_cnt], 1             \n\t"
     "addi %[others_cnt], %[others_cnt], 3     \n\t"
-    "bnez %[arr_size], loop                   \n\t"
+    "bnez %[arr_size], improved_loop          \n\t"
