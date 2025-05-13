@@ -1,7 +1,53 @@
-## Assignment Goal
+## Assignment Summary
+This assignment focuses on **performance modeling and instruction-level optimization** on a RISC-V processor using inline assembly. 
+- F/D extensions for single/double-precision floating point
 
+- M extension for multiplication/division
 
-## V extension
+- V extension for vector processing
+## Objectives:
+```
+- Implement mathematical operations (FFT, array multiplication, etc.)
+
+- Collect instruction counts using counters like ```add_cnt```, ```fmul_cnt```, etc.
+
+- Compute total cycle count and CPU time using predefined CPI values
+
+- Characterize your code as CPU-bound or Memory-bound using the provided performance ratio formula
+```
+## Implementation Tasks:
+
+```
+1. FFT:
+   1-1: Implement Cooley-Tukey radix-2 DIF FFT using inline assembly
+   1-2: Complete core functions: complex_add, complex_mul, bit_reverse, and log2
+
+2. Array Multiplication:
+   2-1: Implement float array multiplication (baseline, no V extension)
+   2-2: Rewrite using V extension for performance comparison
+
+3. Float/Double Reduction Multiplication:
+   3-1: Multiply all float elements of two arrays (float version)
+   3-2: Repeat using double-precision, then compare slowdown and relative error
+
+```
+
+## Performance Analysis
+```
+total_cycle_count = Σ(counter × corresponding_CPI)
+cpu_time = total_cycle_count × cycle_time
+```
+To determine whether your program is **CPU-bound** or **Memory-bound**, use the following ratio:
+
+$`
+\text{Ratio} = \frac{\text{CPU cycles (non-load/store)}}{\text{Total cycles}}
+`$
+
+- If the ratio \( > 0.5 \), the program is **CPU-bound**.
+- If the ratio \( \leq 0.5 \), the program is **Memory-bound**.
+  
+## V Extension
+use RISC-V vector instructions (`vle32.v`, `vfmul.vv`, `vfadd.vf`, etc.) for element-wise operations on arrays using 32-bit float vectors.
 ```
 //use V extension
 "loop:"                                             //e32 tell the processor use 
@@ -17,20 +63,23 @@
     "add %[h], %[h], t0                       \n\t"
     "add %[x], %[x], t0                       \n\t"
     "add %[y], %[y], t0                       \n\t"
-
-    "addi %[add_cnt], %[add_cnt], 3           \n\t"
-    "addi %[sub_cnt], %[sub_cnt], 1           \n\t"
-    "addi %[fmul_cnt], %[fmul_cnt], 1         \n\t"//vfmul
-    "addi %[fadd_cnt], %[fadd_cnt], 1         \n\t"//vfadd
-    "addi %[lw_cnt], %[lw_cnt], 2             \n\t"//vle32 
-    "addi %[sw_cnt], %[sw_cnt], 1             \n\t"//vfse32
-    "addi %[others_cnt], %[others_cnt], 3     \n\t"//vsetvli,bnez,slli
-
     "bnez %[arr_size], loop                   \n\t"
 ```
+## Note
+- [Early Clobber in Inline ASM](#early-clobber-in-inline-asm)
+- [Approximation to Pi](#approximation-to--pi)
+- [Bit Reverse](#bit-reverse)
+- [Single vs Double Precision](#single-vs-double-precision)
+- [Common Mistakes in `rem`](#common-mistakes-in-rem)
 
-## early clobber
-SHOULD BE [C_Re] "=&f" NOT [C_Re] "=f"
+
+### Early Clobber in Inline ASM 
+You must use `=&f` for outputs modified before all inputs are read to prevent register hazards.
+```
+Wrong: [C_Re] "=f"
+Correct: [C_Re] "=&f"
+```
+The below shows the problem
 ```
 Complex complex_mul(Complex a, Complex b)
 {
@@ -45,32 +94,39 @@ Complex complex_mul(Complex a, Complex b)
         "fmul.s f4, %[A_Im], %[B_Re]       \n\t"
         "fadd.s %[C_Im], f3, f4            \n\t"
 
-        : [C_Re] "=&f"(result.Re), [C_Im] "=f"(result.Im), [fmul_cnt] "+r"(fmul_cnt), [fsub_cnt] "+r"(fsub_cnt), [fadd_cnt] "+r"(fadd_cnt)
+        : [C_Re] "=f"(result.Re), [C_Im] "=f"(result.Im), [fmul_cnt] "+r"(fmul_cnt), [fsub_cnt] "+r"(fsub_cnt), [fadd_cnt] "+r"(fadd_cnt)
         : [C_Re] "=f"(result.Re), [C_Im] "=f"(result.Im), [fmul_cnt] "+r"(fmul_cnt), [fsub_cnt] "+r"(fsub_cnt), [fadd_cnt] "+r"(fadd_cnt)
         : [A_Re] "f"(a.Re), [B_Re] "f"(b.Re),
         [A_Im] "f"(a.Im), [B_Im] "f"(b.Im)
         : "f1", "f2", "f3", "f4"
     );
-    //printf("mul operation\n");
-    //printf("A_Re:%f,A_Im:%f\n",a.Re,a.Im);
-    //printf("B_Re:%f,B_Im:%f\n",b.Re,b.Im);
-    //printf("C_Re:%f,C_Im:%f\n",result.Re,result.Im);
     return result;
 }
 ```
 
-## Approximation to PI
-Using Lebitnize series
-```
-```
+### Approximation to Pi
+Approximate π using the Leibniz series:
+
+$`
+\pi \approx 4 \left(1 - \frac{1}{3} + \frac{1}{5} - \frac{1}{7} + \frac{1}{9} - \cdots \right)
+\pi \approx 4 \sum_{i=0}^{\infty} \frac{(-1)^i}{2i + 1}
+`$
 
 
-## Bit reverse
-A common mistake for bit reversing:
+
+### Bit Reverse
+Reverse the bits of a number using shift and mask instructions.
+You must know how many bits to reverse (m), e.g., for m = 10:
 ```
+1 (0000000001) → 512 (1000000000)
+
+2 (0000000010) → 256 (0100000000)
+```
+A common mistake for bit reverse:
+```
+//wrong
 uint32_t bit_reverse(uint32_t b, uint32_t m)
-{
-    
+{   
     asm volatile (
         "add t2, %[b], x0                      \n\t"
         "addi t0, x0, 0                        \n\t"
@@ -90,36 +146,8 @@ uint32_t bit_reverse(uint32_t b, uint32_t m)
     return b;
 }
 ```
-We have to know the bit len for a given number. Why?:
-```
-Bit len (m) = 2
-1 -> 2 (01->10)
-2 _> 1 (10->01)
-```
-```
-Bit len (m) = 10
-1 -> 512 (0000000001 -> 1000000000)
-2 -> 256 (00000000010 -> 0100000000)
-```
-```
-//we have to know how many bit to reversed
-"add t2, %[m], x0                               \n\t"
-"addi t0, x0, 0                                 \n\t"
-"addi %[add_cnt], %[add_cnt], 2                 \n\t"
-"reverse_loop:                                  \n\t"
-    "slli t0, t0, 1                             \n\t"
-    "andi t1, %[b], 1                           \n\t"
-    "or t0, t0, t1                              \n\t"
-    "srli %[b], %[b], 1                         \n\t"
-    "addi t2, t2, -1                            \n\t"
-    "addi %[add_cnt], %[add_cnt], 1             \n\t"
-    "addi %[others_cnt], %[others_cnt], 5       \n\t"
-    "bnez t2, reverse_loop                      \n\t"
-"add %[b], t0, x0                               \n\t"
-"addi %[add_cnt], %[add_cnt], 1                 \n\t"
 
-```
-## single/doulbe use different sytax and differen size
+### Single vs Double Precision
 ```
 //single float array
 "loop:                                         \n\t"
@@ -152,9 +180,15 @@ Bit len (m) = 10
     "bnez %[arr_size], loop                    \n\t"
 ```
 
-## common mistake
-exercise1.c:83: Error: illegal operands `rem t3,t0,2'   
-use and to extract last bit to check "andi t3, t0, 1                           \n\t"
+### Common Mistakes in `rem`
+
+exercise1.c:83: Error: illegal operands `rem t3, t0, 2`,  
+```
+1. cannot use rem on float registers
+2. rem's arguments can only be two register
+```
+use and to extract last bit to check `andi t3, t0, 1`
+
 ```
 //wrong
 "add  t1, x0, x0                    \n\t"//i=0
