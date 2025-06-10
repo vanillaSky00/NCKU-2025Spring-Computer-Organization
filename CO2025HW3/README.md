@@ -1,5 +1,4 @@
-
-
+### Overall
 This document explains why and how the provided matrix_transpose_improved.c and matrix_multiply_improved.c achieve major speed‑ups, and it introduces three classic loop‑level cache‑optimization techniques—loop interchange, loop fusion, and loop tiling—with easy‑to‑follow C code snippets so you can recognise and apply them in your own projects.
 
 ### Why caches love contiguous access
@@ -7,7 +6,7 @@ This document explains why and how the provided matrix_transpose_improved.c and 
 Modern CPUs fetch data from main memory into the L1 cache in cache‑lines (typically 64 B). If successive loads/stores hit the same cache‑line, the operation costs ~4 cycles; if they come from different lines it costs hundreds of cycles. All three techniques below rearrange loops so that the next datum you need is already in L1.
 
 
-###  Loop Interchange – improve spatial locality
+### Loop Interchange – improve spatial locality
 Change the nesting order so the loop variable that corresponds to contiguous memory advances fastest.
 Before (transposing an matrix): column walk causes cache misses
 ```
@@ -43,3 +42,26 @@ for (int i = 0; i < N; ++i) {
 ```
 
 ### Loop Tiling (Blocking) – optimise both localities
+
+
+
+
+
+### InstaLL simulator
+```
+cd ~riscv/
+sudo apt install device-tree-compiler libboost-regex-dev ;ibboost-all-dev
+git clone https://github.com/riscv/riscv-isa-sim.git
+mkdir build
+cd build
+../configure --prefix=$RISCV
+make
+sudo make install
+
+under /home/CompOrg/riscv/riscv-isa-sim
+we have riscv directory
+cp riscv/cachesim.h riscv/cachesim.h.orig
+cp riscv/cachesim.cc riscv/cachesim.cc.orig
+cp /path/to/your/new/cachesim.h  riscv/
+cp /path/to/your/new/cachesim.cc riscv/
+```
