@@ -78,3 +78,11 @@ cp riscv/cachesim.cc riscv/cachesim.cc.orig
 cp /path/to/your/new/cachesim.h  riscv/
 cp /path/to/your/new/cachesim.cc riscv/
 ```
+<br> <br/>
+## Key insights
+
+| Concept                  | Explanation |
+|--------------------------|-------------|
+| **Why FIFO > LFSR**      | **LFSR** (Linear Feedback Shift Register) performs pseudo-random replacement and ignores temporal locality — recently-used lines may be evicted just like cold ones.<br><br>**FIFO** ensures that a line stays in the cache for an entire rotation of the set, allowing for short-term temporal reuse. This typically results in a lower miss rate, as demonstrated in the assignment's logs. |
+| **Write-back timing**    | A write-back occurs **only when a dirty line is evicted** (i.e., chosen as a victim).<br><br>The data is written back to the **next memory level** — either an L2/L3 cache or main memory (DRAM), depending on cache hierarchy. |
+| **Capacity vs Conflict Miss** | **Capacity miss**: Happens when the total working set size exceeds the overall cache capacity — even with full associativity.<br><br>**Conflict miss**: Occurs when multiple addresses map to the same cache set, and the associativity (i.e., number of ways) is too limited to hold all of them, causing evictions even though cache has unused space elsewhere. |
