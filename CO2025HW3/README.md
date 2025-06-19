@@ -12,6 +12,19 @@
 | `clean_invalidate()` | Handles explicit cache cleans / invalidations; still uses `victimize` logic.                                                     |
 | `print_stats()`      | Aggregates hits, misses, write-backs for evaluation.                                                                             |
 
+`access()`
+```
+Try to find addr in cache (check_tag).
+   └─ If found:
+         If write, mark line as dirty. Done.
+   └─ Else (cache miss):
+         a. Count miss.
+         b. Pick a victim (victimize).
+         c. If victim is dirty+valid → write it back to lower level.
+         d. Load new line from lower level.
+         e. If store, mark new line as dirty.
+```
+
 <br> <br/>
 ## Matrix Optimization
 ### Why caches love contiguous access
