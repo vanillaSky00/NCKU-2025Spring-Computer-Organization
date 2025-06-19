@@ -117,3 +117,47 @@ cp /path/to/your/new/cachesim.cc riscv/
 | **Why FIFO > LFSR**      | **LFSR** (Linear Feedback Shift Register) performs pseudo-random replacement and ignores temporal locality — recently-used lines may be evicted just like cold ones.<br><br>**FIFO** ensures that a line stays in the cache for an entire rotation of the set, allowing for short-term temporal reuse. This typically results in a lower miss rate, as demonstrated in the assignment's logs. |
 | **Write-back timing**    | A write-back occurs **only when a dirty line is evicted** (i.e., chosen as a victim).<br><br>The data is written back to the **next memory level** — either an L2/L3 cache or main memory (DRAM), depending on cache hierarchy. |
 | **Capacity vs Conflict Miss** | **Capacity miss**: Happens when the total working set size exceeds the overall cache capacity — even with full associativity.<br><br>**Conflict miss**: Occurs when multiple addresses map to the same cache set, and the associativity (i.e., number of ways) is too limited to hold all of them, causing evictions even though cache has unused space elsewhere. |
+
+
+### WT (Write Through) vs. WB (Write Back):
+- Write-through: safer, often used in L1 caches, especially for small CPUs or real-time systems.
+- Write-back: more efficient, often used in L2/L3 caches, high-performance systems.
+  
+| Feature                  | **Write-Through**          | **Write-Back**                |
+| ------------------------ | -------------------------- | ----------------------------- |
+| Memory write on update   | ✅ Every time               | ❌ Only on eviction (if dirty) |
+| Dirty bit needed?        | ❌ No                       | ✅ Yes                         |
+| Simpler design           | ✅ Yes                      | ❌ More complex                |
+| Memory always up to date | ✅ Yes                      | ❌ No                          |
+| Write latency            | ❌ Slower (memory involved) | ✅ Faster (cache only)         |
+| Memory traffic           | ❌ High                     | ✅ Low                         |
+
+### WB example:
+> A CPU writes to address 0x1000.
+> <br><br> That data is stored only in cache → Dirty = 1
+> <br><br> Later, another address 0x2000 maps to the same cache set and evicts the 0x1000 block.
+
+Before eviction:
+> eviction: the process of removing data from a cache memory to make space for new data when the cache is full
+
+Spike (or any simulator) checks: is the evicted block Dirty=1 and Valid=1?
+<br><br>
+If yes → Write that old block's data back to main memory (or next memory level like L2).
+
+Only after that, the new block (e.g. from 0x2000) can be brought into the cache.
+<br><br>
+
+| Bit       | Meaning                                                                                           |
+| --------- | ------------------------------------------------------------------------------------------------- |
+| **Valid** | The cache line holds **valid (usable)** data                                                      |
+| **Dirty** | The data in the cache line has been **modified** and is **not the same** as what's in main memory |
+
+<br><br>
+
+| Valid | Dirty | Action when replaced                        |
+| ----- | ----- | ------------------------------------------- |
+| 0     | 0     | No need to write back (line is invalid)     |
+| 1     | 0     | No need to write back (data matches memory) |
+| 1     | 1     | **Write back to memory** before replacement |
+
+
