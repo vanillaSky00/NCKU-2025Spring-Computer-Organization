@@ -1,7 +1,7 @@
 ## Assignment2 Summary
 - [Key insights](#key-insights)
 - [Early Clobber in Inline ASM](#early-clobber-in-inline-asm)
-- [Approximation to Pi](#approximation-to--pi)
+- [Approximation to Pi](#approximation-to-pi)
 - [Bit Reverse](#bit-reverse)
 - [Single vs Double Precision](#single-vs-double-precision)
 - [Common Mistakes in `rem`](#common-mistakes-in-rem)
