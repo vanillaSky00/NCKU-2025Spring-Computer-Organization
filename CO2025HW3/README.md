@@ -1,6 +1,19 @@
-### Overall
-This document explains why and how the provided matrix_transpose_improved.c and matrix_multiply_improved.c achieve major speed‑ups, and it introduces three classic loop‑level cache‑optimization techniques—loop interchange, loop fusion, and loop tiling—with easy‑to‑follow C code snippets so you can recognise and apply them in your own projects.
+## Assigment3 Overall
+- How to use FIFO by editing `cachesim.cc`<br> <br/>
+- Why and how the provided `matrix_transpose_improved.c` and `matrix_multiply_improved.c` achieve major speed‑ups. Here we introduce three classic loop‑level cache‑optimization techniques—`loop interchange`, `loop fusion`, and `loop tiling—with` easy‑to‑follow C code snippets.
+<br> <br/>
 
+## Cache Rule Setting
+| Function             | Role in a miss/hit sequence | 
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `access()`           | Top-level entry: parse address, call `check_tag`, update counters, invoke `victimize` on a miss, perform write-back if needed.   |
+| `check_tag()`        | Extract *set index* (`idx = (addr >> idx_shift) & (sets-1)`), linearly compare tags in that set.                                 |
+| `victimize()`        | **Original**: uses `lfsr.next() % ways` to pick a random way. <br> <br/> **FIFO** version: pop the head of a per-set queue and push the new tag to its tail. |
+| `clean_invalidate()` | Handles explicit cache cleans / invalidations; still uses `victimize` logic.                                                     |
+| `print_stats()`      | Aggregates hits, misses, write-backs for evaluation.                                                                             |
+
+<br> <br/>
+## Matrix Optimization
 ### Why caches love contiguous access
 
 Modern CPUs fetch data from main memory into the L1 cache in cache‑lines (typically 64 B). If successive loads/stores hit the same cache‑line, the operation costs ~4 cycles; if they come from different lines it costs hundreds of cycles. All three techniques below rearrange loops so that the next datum you need is already in L1.
