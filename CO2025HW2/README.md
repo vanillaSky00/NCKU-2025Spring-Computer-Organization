@@ -223,5 +223,22 @@ use and to extract last bit to check `andi t3, t0, 1`
 | **CPU- vs memory-bound test**            | The assignment defines the ratio  $\frac{\text{cycles of non-load/store}}{\text{all cycles}}$ ; > 0.5 → CPU-bound, else memory-bound.                                                                                                                                                                                      |
 | **FFT**                                  | For the small N used in grading (8 complex numbers) most work is floating-point arithmetic, so ratio > 0.5 ⇒ **CPU-bound**.                                                                                                                                                                                                |
 | **Array-mul without / with V-extension** | *Scalar* version is usually memory-bound (two loads + one store dominate). The *vector* version issues one vector ALU op for many elements, so arithmetic grows faster than loads ⇒ the ratio climbs above 0.5 ⇒ **CPU-bound** after vectorisation.                                                                        |
-| **Why pseudo-instructions forbidden?**   | Spec says “!!Pseudo instructions are not allowed in this assignment!!” because: (1) they expand to multiple real instructions, corrupting your hand-maintained counters; (2) they may secretly use instructions outside the required extension set; (3) graders need deterministic 1-to-1 mapping from code to statistics. |
+| **Why pseudo-instructions forbidden?**   | (1) they expand to multiple real instructions, corrupting your hand-maintained counters; (2) they may secretly use instructions outside the required extension set; (3) graders need deterministic 1-to-1 mapping from code to statistics. |
 | **Why the V extension runs faster**      | A single `vfmul.vv` computes an entire register’s worth of products, slashing instruction count, amortising decode/branch overhead, and letting the vector ALUs work in parallel. Memory traffic is unchanged, but useful work per byte loaded is far higher.                                                              |
+
+They expand into multiple real instructions
+For example, in RISC-V:
+- They are handled by the assembler, not executed directly
+- They expand into multiple real instructions
+```
+li a0, 100000
+```
+Looks like 1 instruction (li = load immediate), but it's a pseudo-instruction.
+
+Under the hood, this might expand into:
+
+```
+lui a0, 1
+addi a0, a0, 34464
+```
+→ So 1 virtual instruction ≠ 1 real instruction
