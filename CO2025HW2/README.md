@@ -73,15 +73,6 @@ use RISC-V vector instructions (`vle32.v`, `vfmul.vv`, `vfadd.vf`, etc.) for ele
     "bnez %[arr_size], loop                   \n\t"
 ```
 ## Note
-### Key insights
-
-| Question                                 | Key idea                                                                                                                                                                                                                                                                                                              |
-| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **CPU- vs memory-bound test**            | The assignment defines the ratio  $\frac{\text{cycles of non-load/store}}{\text{all cycles}}$ ; > 0.5 → CPU-bound, else memory-bound.                                                                                                                                                                                      |
-| **FFT**                                  | For the small N used in grading (8 complex numbers) most work is floating-point arithmetic, so ratio > 0.5 ⇒ **CPU-bound**.                                                                                                                                                                                                |
-| **Array-mul without / with V-extension** | *Scalar* version is usually memory-bound (two loads + one store dominate). The *vector* version issues one vector ALU op for many elements, so arithmetic grows faster than loads ⇒ the ratio climbs above 0.5 ⇒ **CPU-bound** after vectorisation.                                                                        |
-| **Why pseudo-instructions forbidden?**   | Spec says “!!Pseudo instructions are not allowed in this assignment!!” because: (1) they expand to multiple real instructions, corrupting your hand-maintained counters; (2) they may secretly use instructions outside the required extension set; (3) graders need deterministic 1-to-1 mapping from code to statistics. |
-| **Why the V extension runs faster**      | A single `vfmul.vv` computes an entire register’s worth of products, slashing instruction count, amortising decode/branch overhead, and letting the vector ALUs work in parallel. Memory traffic is unchanged, but useful work per byte loaded is far higher.                                                              |
 
 
 ### Early Clobber in Inline ASM 
@@ -224,3 +215,13 @@ use and to extract last bit to check `andi t3, t0, 1`
         "addi t1, t1, -1            \n\t"
         "ble t1, 1000, loop         \n\t"    
 ```
+
+### Key insights
+
+| Concept                                 | Key idea                                                                                                                                                                                                                                                                                                              |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **CPU- vs memory-bound test**            | The assignment defines the ratio  $\frac{\text{cycles of non-load/store}}{\text{all cycles}}$ ; > 0.5 → CPU-bound, else memory-bound.                                                                                                                                                                                      |
+| **FFT**                                  | For the small N used in grading (8 complex numbers) most work is floating-point arithmetic, so ratio > 0.5 ⇒ **CPU-bound**.                                                                                                                                                                                                |
+| **Array-mul without / with V-extension** | *Scalar* version is usually memory-bound (two loads + one store dominate). The *vector* version issues one vector ALU op for many elements, so arithmetic grows faster than loads ⇒ the ratio climbs above 0.5 ⇒ **CPU-bound** after vectorisation.                                                                        |
+| **Why pseudo-instructions forbidden?**   | Spec says “!!Pseudo instructions are not allowed in this assignment!!” because: (1) they expand to multiple real instructions, corrupting your hand-maintained counters; (2) they may secretly use instructions outside the required extension set; (3) graders need deterministic 1-to-1 mapping from code to statistics. |
+| **Why the V extension runs faster**      | A single `vfmul.vv` computes an entire register’s worth of products, slashing instruction count, amortising decode/branch overhead, and letting the vector ALUs work in parallel. Memory traffic is unchanged, but useful work per byte loaded is far higher.                                                              |
